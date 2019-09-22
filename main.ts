@@ -15,12 +15,26 @@ namespace inosyan_floo {
         warpPointList.push(worldPosition2);
     }
 
+    const checkWithinRange = (targetPos: Position) => {
+        const playerPos = player.position().toString();
+        for (let i = -TARGET_RADIUS + 1; i < TARGET_RADIUS; i++) {
+            for (let j = -TARGET_RADIUS + 1; j < TARGET_RADIUS; j++) {
+                if (targetPos.add(positions.create(i, 0, j)).toString() === playerPos) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     const doWarp = (arg1: number, arg2: number, arg3: number) => {
-        const pos = player.position();
+        let pos: Position = null;
         let oppositePos: Position = null;
         for (let i = 0, l = warpPointList.length; i < l; i++) {
             const p = warpPointList[i];
-            if (p.toString() === pos.toString()) {
+            if (checkWithinRange(p)) {
+                player.say('within!!');
+                pos = p;
                 if (i % 2 == 0) {
                     oppositePos = warpPointList[i + 1];
                 } else {
@@ -29,7 +43,7 @@ namespace inosyan_floo {
                 break;
             }
         }
-        if (oppositePos !== null) {
+        if (pos !== null && oppositePos !== null) {
             [mobs.target(TargetSelectorKind.AllPlayers), mobs.target(TargetSelectorKind.AllEntities)].forEach(
                 (target) => {
                     mobs.teleportToPosition(mobs.near(target, pos, TARGET_RADIUS), oppositePos);
